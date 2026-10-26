@@ -41,3 +41,25 @@ test('does not downgrade or rewrite the current version', () => {
   assert.equal(newerVersion('0.9.0', '0.17.0'), false);
   assert.equal(newerVersion('0.18.0', '0.17.0'), true);
 });
+
+const sutura = {
+  ...metadata, name: 'sutura', version: '0.4.0',
+  dist: { ...metadata.dist, tarball: 'https://registry.npmjs.org/sutura/-/sutura-0.4.0.tgz' },
+};
+
+test('packages Sutura with a real assessment test and the qualified Node runtime', () => {
+  const formula = renderFormula(sutura, verifyTarball(sutura, bytes, 'sutura'));
+  assert.match(formula, /class Sutura < Formula/);
+  assert.ok(formula.includes(sutura.dist.tarball));
+  assert.match(formula, /depends_on "node@24"/);
+  assert.match(formula, /bin\/sutura/);
+  assert.match(formula, /assess .*--json/);
+  assert.match(formula, /sutura-repository-assessment-v1/);
+});
+
+test('rejects cross-package substitution and altered Sutura bytes', () => {
+  assert.throws(() => verifyTarball(metadata, bytes, 'sutura'), /identity/i);
+  assert.throws(() => verifyTarball(sutura, bytes, 'gh-glance'), /identity/i);
+  assert.throws(() => verifyTarball(sutura, Buffer.from('wrong bytes'), 'sutura'), /integrity/i);
+  assert.throws(() => renderFormula({ ...sutura, name: 'unexpected' }, 'hash'), /package/i);
+});
