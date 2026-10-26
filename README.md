@@ -39,9 +39,9 @@ an existing version. Only the formula is committed, using this repository's own
 `GITHUB_TOKEN`; no cross-repository credential or change to gh-glance's OIDC npm
 publisher is needed. The workflow can also be dispatched manually.
 
-GitHub disables schedules in public repositories after 60 days without repository
-activity. If no release has updated this tap in that time, re-enable the workflow
-in Actions before the next release. This is a GitHub scheduler limitation.
+If no release has changed the tap for 30 days, the workflow makes one empty
+maintenance commit so GitHub does not disable its schedule after 60 days of
+inactivity. This keeps future releases updating without manual re-enablement.
 
 Local updater checks:
 

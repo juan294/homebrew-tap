@@ -30,13 +30,12 @@ export function renderFormula(metadata, sha256) {
   desc "Live-refreshing GitHub dashboard for your terminal"
   homepage "https://github.com/juan294/gh-glance"
   url "${metadata.dist.tarball}"
-  version "${metadata.version}"
   sha256 "${sha256}"
   license "MIT"
 
   # Use the Node LTS release qualified by upstream's release gate.
-  depends_on "node@24"
   depends_on "gh"
+  depends_on "node@24"
 
   def install
     system "npm", "install", *std_npm_args
@@ -69,7 +68,7 @@ async function main() {
     if (error.code === 'ENOENT') return '';
     throw error;
   });
-  const currentVersion = current.match(/^  version "([^"]+)"$/m)?.[1];
+  const currentVersion = current.match(/gh-glance-(\d+\.\d+\.\d+)\.tgz"/m)?.[1];
   if (current && !currentVersion) throw new Error('Cannot identify current formula version');
   if (currentVersion && !newerVersion(metadata.version, currentVersion)) {
     console.log(`Formula already at ${currentVersion}; npm latest ${metadata.version}`);

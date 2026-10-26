@@ -16,7 +16,7 @@ test('checks published integrity before producing a checksummed formula', () => 
   const sha256 = verifyTarball(metadata, bytes);
   assert.equal(sha256, createHash('sha256').update(bytes).digest('hex'));
   const formula = renderFormula(metadata, sha256);
-  assert.match(formula, /version "0\.17\.0"/);
+  assert.ok(formula.includes(metadata.dist.tarball));
   assert.ok(formula.includes(`sha256 "${sha256}"`));
   assert.match(formula, /depends_on "node@24"/);
 });
