@@ -1,0 +1,43 @@
+name: Update published formula
+
+on:
+  schedule:
+    - cron: '2,17,32,47 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['scripts/**', '.github/workflows/update.yml', 'Formula/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-formula
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+      - run: node --test scripts/update.test.mjs
+      - run: node scripts/update.mjs
+      - name: Publish updated formula
+        run: |
+          if git diff --quiet -- Formula/gh-glance.rb; then
+            echo 'No new npm version'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Formula/gh-glance.rb
+          git commit -m 'chore: update gh-glance to published npm release'
+          git push origin HEAD:main
