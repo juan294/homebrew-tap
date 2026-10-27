@@ -1,8 +1,8 @@
 class GhGlance < Formula
   desc "Live-refreshing GitHub dashboard for your terminal"
   homepage "https://github.com/juan294/gh-glance"
-  url "https://registry.npmjs.org/gh-glance/-/gh-glance-0.17.0.tgz"
-  sha256 "48ac24ce8715dbbf1f76bd48f88bef93295cae238a4583e29bc3f9cc1f38d129"
+  url "https://registry.npmjs.org/gh-glance/-/gh-glance-0.17.1.tgz"
+  sha256 "a407eaca58c9d413705ebbccec8ef5e3d70189c7cebf39b3fdc907556f32ca2f"
   license "MIT"
 
   # Use the Node LTS release qualified by upstream's release gate.
