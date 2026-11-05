@@ -1,8 +1,8 @@
 class Sutura < Formula
   desc "Verified self-healing CI for GitHub Actions"
   homepage "https://github.com/juan294/sutura"
-  url "https://registry.npmjs.org/sutura/-/sutura-0.5.1.tgz"
-  sha256 "4cdaa37cd3956ff176f9c7337d1b4076e77ccb37bc1033d95f94814e1eaf4801"
+  url "https://registry.npmjs.org/sutura/-/sutura-0.5.2.tgz"
+  sha256 "13756cd5f7dcfbd88cba3c704f2b4ef057b27f79375e4ac795daefc78d4a0e2c"
   license "MIT"
 
   # Use the Node LTS release qualified by upstream's release gate.
