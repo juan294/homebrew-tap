@@ -1,10 +1,11 @@
 # Juan's Homebrew tap
 
-Install gh-glance or Sutura on macOS or Linux:
+Install gh-glance or Sutura on macOS or Linux, and Summon on macOS:
 
 ```sh
 brew install juan294/tap/gh-glance
 brew install juan294/tap/sutura
+brew install juan294/tap/summon
 ```
 
 Update it with your usual Homebrew upgrades:
@@ -32,13 +33,15 @@ Restart running dashboard panes after an upgrade; an existing process continues
 running the version it started with.
 
 For Sutura, substitute `sutura` for `gh-glance` in the migration commands above.
+For Summon, the npm package is `summon-ws` and the formula is `summon`:
+`npm uninstall -g summon-ws`, then `brew install juan294/tap/summon`.
 Start with `sutura assess . --json`. Upgrading the CLI does not update each
 repository's pinned GitHub Action; use `sutura upgrade --plan` in each repository
 to review that change.
 
 ## Publication
 
-The updater checks both packages' published npm `latest` versions every 15 minutes (GitHub can
+The updater checks each package's published npm `latest` versions every 15 minutes (GitHub can
 delay scheduled runs). It downloads the exact registry tarball, checks its SHA-512
 integrity, and records its SHA-256 in the formula. It does not downgrade or rewrite
 an existing version. Only the formulae are committed, using this repository's own
@@ -58,4 +61,6 @@ brew audit --strict juan294/tap/gh-glance
 brew test juan294/tap/gh-glance
 brew audit --strict juan294/tap/sutura
 brew test juan294/tap/sutura
+brew audit --strict juan294/tap/summon
+brew test juan294/tap/summon
 ```

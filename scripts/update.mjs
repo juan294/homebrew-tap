@@ -3,8 +3,29 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const packages = {
-  'gh-glance': { className: 'GhGlance', description: 'Live-refreshing GitHub dashboard for your terminal' },
-  sutura: { className: 'Sutura', description: 'Verified self-healing CI for GitHub Actions' },
+  'gh-glance': {
+    className: 'GhGlance', description: 'Live-refreshing GitHub dashboard for your terminal',
+    repo: 'gh-glance', bin: 'gh-glance', dependsOn: ['"gh"', '"node@24"'],
+    test: `    assert_match "--repo", shell_output("#{bin}/gh-glance --help")
+    assert_match "unknown", shell_output("#{bin}/gh-glance --unknown-option 2>&1", 2).downcase`,
+  },
+  sutura: {
+    className: 'Sutura', description: 'Verified self-healing CI for GitHub Actions',
+    repo: 'sutura', bin: 'sutura', dependsOn: ['"gh"', '"node@24"'],
+    test: `    (testpath/"project").mkpath
+    (testpath/"project/package.json").write('{"name":"brew-test","version":"1.0.0"}')
+    assessment = JSON.parse(shell_output("#{bin}/sutura assess #{testpath}/project --json"))
+    assert_equal "sutura-repository-assessment-v1", assessment.fetch("schemaVersion")
+    assert_equal "metadata-only", assessment.fetch("scopeKind")
+    assert_equal true, assessment.fetch("complete")`,
+  },
+  // The npm name is summon-ws; the formula, command and repository are summon. macOS only (package.json "os").
+  'summon-ws': {
+    formula: 'summon', className: 'Summon', description: 'Launch multi-pane Ghostty or Rex workspaces with one command',
+    repo: 'summon', bin: 'summon', dependsOn: [':macos', '"node@24"'],
+    test: `    assert_match "#compdef summon", shell_output("#{bin}/summon completions zsh")
+    assert_match "Usage", shell_output("#{bin}/summon --help")`,
+  },
 };
 const stableVersion = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
@@ -36,34 +57,23 @@ export function renderFormula(metadata, sha256) {
   verifyMetadata(metadata, metadata.name);
   const { name } = metadata;
   const config = packages[name];
-  const functionalTest = name === 'sutura'
-    ? `    (testpath/"project").mkpath
-    (testpath/"project/package.json").write('{"name":"brew-test","version":"1.0.0"}')
-    assessment = JSON.parse(shell_output("#{bin}/sutura assess #{testpath}/project --json"))
-    assert_equal "sutura-repository-assessment-v1", assessment.fetch("schemaVersion")
-    assert_equal "metadata-only", assessment.fetch("scopeKind")
-    assert_equal true, assessment.fetch("complete")`
-    : `    assert_match "--repo", shell_output("#{bin}/gh-glance --help")
-    assert_match "unknown", shell_output("#{bin}/gh-glance --unknown-option 2>&1", 2).downcase`;
   return `class ${config.className} < Formula
   desc "${config.description}"
-  homepage "https://github.com/juan294/${name}"
+  homepage "https://github.com/juan294/${config.repo}"
   url "${metadata.dist.tarball}"
   sha256 "${sha256}"
   license "MIT"
 
   # Use the Node LTS release qualified by upstream's release gate.
-  depends_on "gh"
-  depends_on "node@24"
-
+${config.dependsOn.map(dep => `  depends_on ${dep}\n`).join('')}
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink libexec/"bin/${name}"
+    bin.install_symlink libexec/"bin/${config.bin}"
   end
 
   test do
-    assert_equal version.to_s, shell_output("#{bin}/${name} --version").strip
-${functionalTest}
+    assert_equal version.to_s, shell_output("#{bin}/${config.bin} --version").strip
+${config.test}
   end
 end
 `;
@@ -76,7 +86,7 @@ async function get(url) {
 }
 
 async function updateFormula(packageName) {
-  const formulaPath = new URL(`../Formula/${packageName}.rb`, import.meta.url);
+  const formulaPath = new URL(`../Formula/${packages[packageName].formula ?? packageName}.rb`, import.meta.url);
   const metadata = await (await get(`https://registry.npmjs.org/${packageName}/latest`)).json();
   // Validate before downloading a URL received from outside this repository.
   verifyMetadata(metadata, packageName);

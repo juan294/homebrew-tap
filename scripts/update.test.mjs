@@ -63,3 +63,25 @@ test('rejects cross-package substitution and altered Sutura bytes', () => {
   assert.throws(() => verifyTarball(sutura, Buffer.from('wrong bytes'), 'sutura'), /integrity/i);
   assert.throws(() => renderFormula({ ...sutura, name: 'unexpected' }, 'hash'), /package/i);
 });
+
+const summon = {
+  ...metadata, name: 'summon-ws', version: '2.2.0',
+  dist: { ...metadata.dist, tarball: 'https://registry.npmjs.org/summon-ws/-/summon-ws-2.2.0.tgz' },
+};
+
+test('packages summon-ws as the macOS-only summon formula on the qualified Node runtime', () => {
+  const formula = renderFormula(summon, verifyTarball(summon, bytes, 'summon-ws'));
+  assert.match(formula, /class Summon < Formula/);
+  assert.match(formula, /homepage "https:\/\/github.com\/juan294\/summon"/);
+  assert.ok(formula.includes(summon.dist.tarball));
+  assert.match(formula, /depends_on :macos/);
+  assert.match(formula, /depends_on "node@24"/);
+  assert.doesNotMatch(formula, /depends_on "gh"/);
+  assert.match(formula, /bin\.install_symlink libexec\/"bin\/summon"/);
+  assert.match(formula, /summon completions zsh/);
+});
+
+test('rejects substitution between summon-ws and the other packages', () => {
+  assert.throws(() => verifyTarball(summon, bytes, 'gh-glance'), /identity/i);
+  assert.throws(() => verifyTarball(metadata, bytes, 'summon-ws'), /identity/i);
+});
