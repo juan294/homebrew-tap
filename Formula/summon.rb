@@ -1,8 +1,8 @@
 class Summon < Formula
   desc "Launch multi-pane Ghostty or Rex workspaces with one command"
   homepage "https://github.com/juan294/summon"
-  url "https://registry.npmjs.org/summon-ws/-/summon-ws-2.2.1.tgz"
-  sha256 "b57ded2929c39ea4ed41c7a1a4c819cdf82c8fc47629c05e407b38491c586d5f"
+  url "https://registry.npmjs.org/summon-ws/-/summon-ws-2.2.2.tgz"
+  sha256 "0e6283a96f574e823438614640d3f44b8d3fd7cabacdcc870bd0799a3b288fc6"
   license "MIT"
 
   # Use the Node LTS release qualified by upstream's release gate.
